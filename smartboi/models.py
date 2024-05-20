@@ -4,7 +4,7 @@ from typing import Union
 
 
 class Gemma:
-    def __init__(self, variant='7b-it') -> None:
+    def __init__(self, variant='7b-it', torch_dtype=torch.bfloat16) -> None:
         if variant == '7b-it':
             model_name = 'google/gemma-7b-it'
         elif variant == '2b-it':
@@ -12,7 +12,7 @@ class Gemma:
         else:
             NotImplementedError('This model variant is not implemented.')
 
-        self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map='auto', torch_dtype=torch.bfloat16)
+        self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map='auto', torch_dtype=torch_dtype)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
     def generate(self, prompts: list[str], **gen_kwargs) -> dict:
@@ -24,19 +24,19 @@ class Gemma:
 
 
 class DeepSeekMathIt:
-    def __init__(self) -> None:
+    def __init__(self, torch_dtype=torch.bfloat16) -> None:
         model_name = 'deepseek-ai/deepseek-math-7b-instruct'
         self.model = AutoModelForCausalLM.from_pretrained(
             model_name, 
             device_map='auto', 
-            torch_dtype=torch.bfloat16
+            torch_dtype=torch_dtype
         )
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         self.model.generation_config = GenerationConfig.from_pretrained(model_name)
         self.model.generation_config.pad_token_id = self.model.generation_config.eos_token_id
         self.system_prompt
 
-    def generate(self, prompts: list[str], **gen_kwargs):
+    def generate(self, prompt: str, **gen_kwargs):
         messages = [{'role': 'system', 'content': self.system_prompt}] if self.system_prompt is not None else []
         messages.append({'role': 'user', 'content': prompt})
 
