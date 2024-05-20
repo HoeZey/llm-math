@@ -1,7 +1,6 @@
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, GenerationConfig
 from typing import Union
-from smartboi.prompt import Prompt
 
 
 class Gemma:
@@ -16,7 +15,7 @@ class Gemma:
         self.model = AutoModelForCausalLM.from_pretrained(model_name, device_map='auto', torch_dtype=torch.bfloat16)
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    def generate(self, prompts: list[Prompt], **gen_kwargs) -> dict:
+    def generate(self, prompts: list[str], **gen_kwargs) -> dict:
         out = self.model.generate(
             **self.tokenizer(prompts, return_tensors='pt').to(self.model.device), 
             **gen_kwargs
@@ -37,7 +36,7 @@ class DeepSeekMathIt:
         self.model.generation_config.pad_token_id = self.model.generation_config.eos_token_id
         self.system_prompt
 
-    def generate(self, prompts: list[Prompt], **gen_kwargs):
+    def generate(self, prompts: list[str], **gen_kwargs):
         messages = [{'role': 'system', 'content': self.system_prompt}] if self.system_prompt is not None else []
         messages.append({'role': 'user', 'content': prompt})
 
